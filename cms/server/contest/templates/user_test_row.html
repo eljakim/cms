@@ -5,6 +5,7 @@
 {% else %}
     <td class="time">{{ t.timestamp|format_time }}</td>
 {% endif %}
+    <td class="language">{{ t.language }} </td>
     <td class="status">
 {% if status == UserTestResult.COMPILING %}
         {% trans %}Compiling...{% endtrans %}

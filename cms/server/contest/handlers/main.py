@@ -65,6 +65,15 @@ class MainHandler(ContestHandler):
     def get(self):
         self.render("overview.html", **self.r_params)
 
+class UserDirectLoginHandler(ContestHandler):
+    """Handler for users coming in from another system.
+
+    """
+    @multi_contest
+    def get(self):
+        pass
+
+
 
 class RegistrationHandler(ContestHandler):
     """Registration handler.

@@ -169,6 +169,7 @@ $(document).ready(function () {
 {% else %}
         <col class="time"/>
 {% endif %}
+        <col class="language"/>
         <col class="status"/>
         <col class="time"/>
         <col class="memory"/>
@@ -183,6 +184,7 @@ $(document).ready(function () {
 {% else %}
             <th class="time">{% trans %}Time{% endtrans %}</th>
 {% endif %}
+            <th class="language">{% trans %}Language{% endtrans %}</th>
             <th class="status">{% trans %}Status{% endtrans %}</th>
             <th class="time">{% trans %}Execution time{% endtrans %}</th>
             <th class="memory">{% trans %}Memory used{% endtrans %}</th>

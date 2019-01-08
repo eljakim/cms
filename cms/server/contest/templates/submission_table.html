@@ -6,6 +6,7 @@
 {% else %}
         <col class="time"/>
 {% endif %}
+        <col class="language"/>
         <col class="status"/>
 {% if score_type is defined %}
     {% if 0 < score_type.max_public_score < score_type.max_score %}
@@ -33,6 +34,7 @@
 {% else %}
             <th class="time">{% trans %}Time{% endtrans %}</th>
 {% endif %}
+            <th class="language">{% trans %}Language{% endtrans %}</th>
             <th class="status">{% trans %}Status{% endtrans %}</th>
 {% if score_type is defined %}
     {% if 0 < score_type.max_public_score < score_type.max_score %}

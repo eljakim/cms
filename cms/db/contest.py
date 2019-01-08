@@ -117,6 +117,31 @@ class Contest(Base):
         nullable=False,
         default=False)
 
+    # Whether to allow direct authentication from external system
+    allow_direct_authentication = Column(
+        Boolean,
+        nullable=False,
+        default=False)
+
+    # Direct authentication secret
+    direct_authentication_secret = Column(
+        Unicode,
+        nullable=True)
+
+    # Whether to show the menu on the left hand side if a user signed in
+    # using direct authentication
+    allow_direct_menu = Column(
+        Boolean,
+        nullable=True,
+        default=False)
+
+    # Whether to automatically insert an unknown user to the database or
+    # add a selected user to the current contest.
+    allow_direct_useradd = Column(
+        Boolean,
+        nullable=True,
+        default=False)
+
     # Whether to enforce that the IP address of the request matches
     # the IP address or subnet specified for the participation (if
     # present).
