@@ -33,7 +33,8 @@ from .main import \
     StartHandler, \
     NotificationsHandler, \
     PrintingHandler, \
-    DocumentationHandler
+    DocumentationHandler, \
+    UserDirectLoginHandler
 from .task import \
     TaskDescriptionHandler, \
     TaskStatementViewHandler, \
@@ -71,6 +72,9 @@ HANDLERS = [
     (r"/tasks/(.*)/description", TaskDescriptionHandler),
     (r"/tasks/(.*)/statements/(.*)", TaskStatementViewHandler),
     (r"/tasks/(.*)/attachments/(.*)", TaskAttachmentViewHandler),
+
+    # Direct user login
+    (r"/directlogin", UserDirectLoginHandler),
 
     # Task submissions
 

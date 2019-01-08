@@ -128,6 +128,41 @@
         <input type="checkbox" id="ip_autologin" name="ip_autologin" {{ "checked" if contest.ip_autologin else "" }}/>
       </td>
     </tr>
+    <tr><td colspan=2><h2>External Authentication</h2></td></tr>
+    <tr>
+      <td>
+        <span class="info" title="If checked, contestants will be able to log in from another system by using a direct URL, based on the direct_authentication_secret."></span>
+        <label for="allow_direct_authentication">Allow direct authentication</label>
+      </td>
+      <td>
+        <input type="checkbox" id="allow_direct_authentication" name="allow_direct_authentication" {{ "checked" if contest.allow_direct_authentication else "" }}/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+	<span class="info" title="The secret value that is shared with the external system that wants to allow students to deeplink to the proper tasks. As the word says: keep this a secret"></span>
+        Direct authentication secret
+      </td>
+      <td><input type="text" name="direct_authentication_secret" value="{{ contest.direct_authentication_secret }}"></td>
+    </tr>
+    <tr>
+      <td>
+	<span class="info" title="If checked, contestants will see the menu on the left hand side if logged in using using direct authentication."></span>
+        <label for="allow_direct_menu">Show menu for direct authentication</label>
+      </td>
+      <td>
+        <input type="checkbox" id="allow_direct_menu" name="allow_direct_menu" {{ "checked" if contest.allow_direct_menu else "" }}/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="info" title="If checked, new participants will be automatically added to the database."></span>
+        <label for="allow_direct_useradd">Accept new participants</label>
+      </td>
+      <td>
+        <input type="checkbox" id="allow_direct_useradd" name="allow_direct_useradd" {{ "checked" if contest.allow_direct_useradd else "" }}/>
+      </td>
+    </tr>
 
     <tr><td colspan=2><h2>Tokens parameters (<a href="http://cms.readthedocs.org/en/{{ rtd_version }}/Configuring%20a%20contest.html#feedback-to-contestants" target="_blank">documentation</a>)</h2></td></tr>
     <tr>
