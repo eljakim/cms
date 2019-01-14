@@ -16,6 +16,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# In order to install the Kotlin compiler on Ubuntu 18.04 run
+# snap install kotlin --classic
+#
+# Note: Kotlin compiles to Java, so you'll need java as well.
+
 """Kotlin programming language definition."""
 
 from cms.grading import Language

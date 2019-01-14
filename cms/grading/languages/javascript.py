@@ -18,6 +18,9 @@
 
 """Javascript programming language definition."""
 
+# In order to setup JavaScript on Ubuntu 18.04 run
+# apt install nodejs
+
 from cms.grading import Language
 
 

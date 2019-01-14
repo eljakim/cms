@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# In order to install a Visual Basic grader on Ubuntu 18.04, run
+# apt install mono-vbnc
+
 """Visual Basic programming language definition."""
 
 from cms.grading import Language
