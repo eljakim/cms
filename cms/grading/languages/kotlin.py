@@ -44,10 +44,10 @@ class Kotlin(Language):
                                  source_filenames, executable_filename,
                                  for_evaluation=True):
         """See Language.get_compilation_commands."""
-        return [["/snap/bin/kotlinc", source_filenames[0], "-include-runtime", "-d", "%s.jar" % executable_filename]]
+        return [["/snap/kotlin/current/bin/kotlinc", source_filenames[0], "-include-runtime", "-d", "%s.jar" % executable_filename], ["/bin/mv", "%s.jar" % executable_filename, executable_filename]]
 
     def get_evaluation_commands(
             self, executable_filename, main=None, args=None):
         """See Language.get_evaluation_commands."""
         args = args if args is not None else []
-        return [["/usr/bin/java", "-jar", "%s.jar" % executable_filename] + args]
+        return [["/bin/mv", executable_filename, "%s.jar" % executable_filename], ["/usr/bin/java", "-jar", "%s.jar" % executable_filename] + args]

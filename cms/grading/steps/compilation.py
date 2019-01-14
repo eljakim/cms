@@ -97,7 +97,7 @@ def compilation_step(sandbox, commands):
     # but it is a symlink to "/var/lib/ghc/package.conf.d"
     sandbox.maybe_add_mapped_directory("/var/lib/ghc")
     # kotlin requires the following to be visible
-    sandbox.maybe_add_mapped_directory("/snap")
+    sandbox.add_mapped_directory("/snap/kotlin/current")
     sandbox.preserve_env = True
     sandbox.max_processes = config.compilation_sandbox_max_processes
     sandbox.timeout = config.compilation_sandbox_max_time_s

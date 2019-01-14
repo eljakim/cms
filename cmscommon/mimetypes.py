@@ -53,7 +53,7 @@ def get_icon_for_type(typename):
         type, e.g., "x-office-document".
 
     """
-    mimetype = xdg.Mime.lookup(typename).canonical()
+    mimetype = xdg.Mime.lookup(typename)
     typename = "%s/%s" % (mimetype.media, mimetype.subtype)
     if typename in _icons:
         return _icons[typename]
@@ -69,7 +69,7 @@ def get_name_for_type(typename):
         of the given MIME type, e.g., "PDF document".
 
     """
-    mimetype = xdg.Mime.lookup(typename).canonical()
+    mimetype = xdg.Mime.lookup(typename)
     return mimetype.get_comment()
 
 
@@ -83,7 +83,7 @@ def get_type_for_file_name(filename):
         e.g., "application/pdf".
 
     """
-    mimetype = xdg.Mime.get_type_by_name(filename).canonical()
+    mimetype = xdg.Mime.get_type_by_name(filename)
     if mimetype is None:
         return None
     return "%s/%s" % (mimetype.media, mimetype.subtype)
