@@ -2,6 +2,7 @@
  * Copyright © 2012-2014 Stefano Maggiolo <s.maggiolo@gmail.com>
  * Copyright © 2012-2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
  * Copyright © 2013 Vittorio Gambaletta <VittGam@VittGam.net>
+ * Copyright © 2019 Eljakim Schrijvers <eljakim@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -223,7 +224,9 @@ CMS.CWSUtils.prototype.format_timedelta = function(timedelta) {
     }
     else {
         // Otherwise only return the number of days.
-        return days + $("#translation_days").text();
+        // user eval() because there is no sprintf() in JavaScript, and
+        // IE does not support templates
+        return eval($("#translation_days").text());
     }
 };
 
