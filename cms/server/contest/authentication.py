@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 
 # Contest Management System - http://cms-dev.github.io/
@@ -29,6 +30,9 @@
 import ipaddress
 import json
 import logging
+import secrets
+import hashlib
+import pickle
 from datetime import timedelta
 
 from sqlalchemy.orm import contains_eager, joinedload
@@ -59,7 +63,7 @@ def get_password(participation):
         return participation.password
 
 def validate_directlogin(
-        sql_session, contest, timestamp, username, token, request_timestamp, ip_address):
+        sql_session, username, contest, timestamp, token, request_timestamp, ip_address):
    
     logger.info("Login attempt from IP address %s, as user %r with token %s and timestamp %s", ip_address, username, token, request_timestamp)
 
@@ -76,103 +80,47 @@ def validate_directlogin(
         log_failed_attempt("no secret set for direct authentication")
         return None, None
 
-    if request_timestamp < timestamp:
-        log_failed_attempt("timestamp given in URL has expired")
-        return None, None
-
-    expectedtoken = hashlib.md5(username + contest.direct_authentication_secret + request_timestamp)
+    expectedtoken = hashlib.md5((username + contest.direct_authentication_secret + timestamp).encode('utf-8')).hexdigest()
 
     if token != expectedtoken:
-        log_failed_attempt("incorrect token")
+        log_failed_attempt("incorrect token (%s), expected token is %s",token,expectedtoken)
         return None, None
 
     participation = sql_session.query(Participation) \
         .join(Participation.user) \
-        .options(contains_earger(Participation.user)) \
+        .options(contains_eager(Participation.user)) \
         .filter(Participation.contest == contest) \
+        .filter(User.username == username) \
+        .first()
+
+    user = sql_session.query(User) \
         .filter(User.username == username) \
         .first()
 
     if participation is None:
         if not contest.allow_direct_useradd:
-            log_failed_attempt("user not know in current contest")
+            log_failed_attempt("user not known in selected contest")
             return None, None
 
-        user = sql_session_query(User) \
-                .filter(User.username == username) \
-                .first()
-
+        # If the user is not yet in the database, add the user.
         if user is None:
-            # User not known, but we're allowed to add the user to the database.
-            pass
-
-        # participation record is not known, so create this.
+            random_password=hashlib.md5(secrets.token_bytes(128)).hexdigest()
+            user = User(username=username,password="plaintext:"+random_password,first_name=username,last_name=username,preferred_languages=[])
+            sql_session.add(user)
+        participation = Participation(contest=contest,user=user)
+        sql_session.add(participation)
+        sql_session.commit()
+        # The user is now in the database, but has no participation
+        # in the selected contest. So add the user to the contest.
 
     logger.info("Successful login attempt from IP address %s, as user %r, on "
                 "contest %s, at %s", ip_address, username, contest.name,
                 timestamp)
 
     return (participation,
-            json.dumps([username, password, make_timestamp(timestamp)])
+            json.dumps([username,user.password,make_timestamp(request_timestamp)])
                 .encode("utf-8"))
 
-def validate_directlogin(
-        sql_session, contest, timestamp, username, token, request_timestamp, ip_address):
-   
-    logger.info("Login attempt from IP address %s, as user %r with token %s and timestamp %s", ip_address, username, token, request_timestamp)
-
-    def log_failed_attempt(msg, *args):
-        logger.info("Unsuccessful login attempt from IP address %s, as user "
-                    "%r, on contest %s, at %s: " + msg, ip_address,
-                    username, contest.name, timestamp, *args)
-
-    if not contest.allow_direct_authentication:
-        log_failed_attempt("direct authentication not allowed")
-        return None, None
-
-    if not contest.direct_authentication_secret:
-        log_failed_attempt("no secret set for direct authentication")
-        return None, None
-
-    if request_timestamp < timestamp:
-        log_failed_attempt("timestamp given in URL has expired")
-        return None, None
-
-    expectedtoken = hashlib.md5(username + contest.direct_authentication_secret + request_timestamp)
-
-    if token != expectedtoken:
-        log_failed_attempt("incorrect token")
-        return None, None
-
-    participation = sql_session.query(Participation) \
-        .join(Participation.user) \
-        .options(contains_earger(Participation.user)) \
-        .filter(Participation.contest == contest) \
-        .filter(User.username == username) \
-        .first()
-
-    if participation is None:
-        if not contest.allow_direct_useradd:
-            log_failed_attempt("user not know in current contest")
-            return None, None
-
-        user = sql_session_query(User) \
-                .filter(User.username == username) \
-                .first()
-
-        if user is None:
-            # User not known, but we're allowed to add the user to the database.
-            pass
-
-        # participation record is not known, so create this.
-
-    logger.info("Successful login attempt from IP address %s, as user %r, on "
-                "contest %s, at %s", ip_address, username, contest.name,
-                timestamp)
-
-    return (participation,
-            json.dumps([username, password, make_timestamp(timestamp)])
-                .encode("utf-8"))
 
 def validate_login(
         sql_session, contest, timestamp, username, password, ip_address):

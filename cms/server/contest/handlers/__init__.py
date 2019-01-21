@@ -74,7 +74,7 @@ HANDLERS = [
     (r"/tasks/(.*)/attachments/(.*)", TaskAttachmentViewHandler),
 
     # Direct user login
-    (r"/directlogin", UserDirectLoginHandler),
+    (r"/user/(.*)/contest/(.*)", UserDirectLoginHandler),
 
     # Task submissions
 

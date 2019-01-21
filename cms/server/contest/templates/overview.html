@@ -194,7 +194,6 @@
     <thead>
         <tr>
             <th>{% trans %}Task{% endtrans %}</th>
-            <th>{% trans %}Name{% endtrans %}</th>
             <th>{% trans %}Time limit{% endtrans %}</th>
             <th>{% trans %}Memory limit{% endtrans %}</th>
             <th>{% trans %}Type{% endtrans %}</th>
@@ -208,8 +207,7 @@
 {% set extensions = "[%s]"|format(contest.languages|map("to_language")|map(attribute="source_extension")|unique|join("|")) %}
 {% for t_iter in contest.tasks %}
         <tr>
-            <th>{{ t_iter.name }}</th>
-            <td>{{ t_iter.title }}</td>
+            <th><a href='/tasks/{{ t_iter.name }}/submissions'>{{ t_iter.title }}</a></th>
             <td>
     {% if t_iter.active_dataset.time_limit is not none %}
         {{ t_iter.active_dataset.time_limit|format_duration(length="long") }}

@@ -31,6 +31,7 @@ import ipaddress
 import json
 import logging
 import re
+import time
 
 import tornado.web
 from sqlalchemy.orm.exc import NoResultFound
@@ -39,7 +40,7 @@ from cms import config
 from cms.db import PrintJob, User, Participation, Team
 from cms.grading.steps import COMPILATION_MESSAGES, EVALUATION_MESSAGES
 from cms.server import multi_contest
-from cms.server.contest.authentication import validate_login
+from cms.server.contest.authentication import validate_login,validate_directlogin
 from cms.server.contest.communication import get_communications
 from cms.server.contest.printing import accept_print_job, PrintingDisabled, \
     UnacceptablePrintJob
@@ -70,9 +71,61 @@ class UserDirectLoginHandler(ContestHandler):
 
     """
     @multi_contest
-    def get(self):
-        pass
+    def get(self, username, contestname):
+        # Allow 3 minutes of time drift between servers
+        drift_allowed_seconds = 3600 # TODO change to 180 when not debugging! 
+        error_args = {"login_error": "true"}
+        task_name = self.get_argument("task", None)
 
+        if task_name is None:
+            next_page = self.contest_url()
+        else:
+            next_page = self.contest_url() + "/tasks/%s/submissions" % task_name
+
+        error_page = self.contest_url(**error_args)
+
+        token     = self.get_argument("token", "")
+
+        try:
+            timestamp = int(self.get_argument("timestamp", "0"))
+        except:
+            logger.warning("no valid timestamp provided in url.")
+            return None
+
+        current_timestamp = time.time()
+
+        if timestamp > current_timestamp+drift_allowed_seconds:
+            logger.warning("timestamp more than %d seconds in future" , drift_allowed_seconds)
+            return None
+
+        if timestamp < current_timestamp-drift_allowed_seconds:
+            logger.warning("timestamp more than %d seconds in past" , drift_allowed_seconds)
+            return None
+
+        try:
+            # In py2 Tornado gives us the IP address as a native binary
+            # string, whereas ipaddress wants text (unicode) strings.
+            ip_address = ipaddress.ip_address(str(self.request.remote_ip))
+        except ValueError:
+            logger.warning("Invalid IP address provided by Tornado: %s",
+                           self.request.remote_ip)
+            return None
+
+        participation, cookie = validate_directlogin(
+            self.sql_session, username, self.contest, str(timestamp), token, self.timestamp, ip_address)
+
+        cookie_name = self.contest.name + "_login"
+        if cookie is None:
+            self.clear_cookie(cookie_name)
+        else:
+            self.set_secure_cookie(cookie_name, cookie, expires_days=None)
+
+        if participation is None:
+            logger.warning("Login failed, redirecting to %s", error_page)
+            self.redirect(error_page)
+        else:
+            logger.warning("Login succesfull, redirecting to %s", next_page)
+            self.redirect(next_page)
 
 
 class RegistrationHandler(ContestHandler):
