@@ -417,6 +417,11 @@ td.token_rules p:last-child {
     display: flex;
     justify-content: space-evenly;
     font-weight: bold;
+    text-align: center;
+}
+
+#task_score_public {
+    width: 100%;
 }
 
 .task_score {
