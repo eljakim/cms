@@ -34,7 +34,8 @@ from .main import \
     NotificationsHandler, \
     PrintingHandler, \
     DocumentationHandler, \
-    UserDirectLoginHandler
+    UserDirectLoginHandler, \
+    UserScoreHandler
 from .task import \
     TaskDescriptionHandler, \
     TaskStatementViewHandler, \
@@ -75,6 +76,7 @@ HANDLERS = [
 
     # Direct user login
     (r"/user/(.*)/contest/(.*)", UserDirectLoginHandler),
+    (r"/score/user/(.*)/contest/(.*)", UserScoreHandler),
 
     # Task submissions
 

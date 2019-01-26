@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
@@ -32,13 +34,16 @@ import json
 import logging
 import re
 import time
+import hashlib
 
 import tornado.web
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import contains_eager, joinedload
 
 from cms import config
-from cms.db import PrintJob, User, Participation, Team
+from cms.db import PrintJob, User, Participation, Team, Task
 from cms.grading.steps import COMPILATION_MESSAGES, EVALUATION_MESSAGES
+from cms.grading.scoring import task_score
 from cms.server import multi_contest
 from cms.server.contest.authentication import validate_login,validate_directlogin
 from cms.server.contest.communication import get_communications
@@ -66,6 +71,74 @@ class MainHandler(ContestHandler):
     def get(self):
         self.render("overview.html", **self.r_params)
 
+class UserScoreHandler(ContestHandler):
+    """Handler that returns the score for a specific task
+
+    """
+    @multi_contest
+    def get(self, username, contestname):
+        drift_allowed_seconds = 180 
+        error_args = {"login_error": "true"}
+        task_name = self.get_argument("task", None)
+        result = {}
+
+        token     = self.get_argument("token", "")
+        current_timestamp = time.time()
+
+        try:
+            timestamp = int(self.get_argument("timestamp", "0"))
+        except:
+            logger.warning("no valid timestamp provided in url.")
+            return None
+
+        if timestamp > current_timestamp+drift_allowed_seconds:
+            logger.warning("timestamp more than %d seconds in future" , drift_allowed_seconds)
+            return None
+
+        if timestamp < current_timestamp-drift_allowed_seconds:
+            logger.warning("timestamp more than %d seconds in past" , drift_allowed_seconds)
+            return None
+
+        expectedtoken = hashlib.md5((username + self.contest.direct_authentication_secret + str(timestamp)).encode('utf-8')).hexdigest()
+
+
+        if token==expectedtoken:
+            participation = self.sql_session.query(Participation) \
+                .join(Participation.user) \
+                .options(contains_eager(Participation.user)) \
+                .options(joinedload('submissions'))\
+                .options(joinedload('submissions.token'))\
+                .options(joinedload('submissions.results'))\
+                .filter(Participation.contest == self.contest) \
+                .filter(User.username == username) \
+                .first()
+            if participation:
+                task = self.sql_session.query(Task) \
+                        .filter(Task.name == task_name) \
+                        .filter(Task.name == task_name) \
+                        .first()
+                if task:
+                    score, partial = task_score(participation, task)
+                    if partial:
+                        self.write(json.dumps(-1))
+                    else:
+                        self.write(json.dumps(score))
+                else:
+                    self.write(json.dumps(0))
+                    logger.warning("unknown task")
+            else:
+                self.write(json.dumps(0))
+                logger.warning("user did not participate")
+                self.write('NO PARTICIPATION')
+            self.finish()
+
+        else:
+            logger.warning("wrong token; received (%s), expected (%s)", token, expectedtoken)
+        return None
+
+
+
+
 class UserDirectLoginHandler(ContestHandler):
     """Handler for users coming in from another system.
 
@@ -73,7 +146,7 @@ class UserDirectLoginHandler(ContestHandler):
     @multi_contest
     def get(self, username, contestname):
         # Allow 3 minutes of time drift between servers
-        drift_allowed_seconds = 3600 # TODO change to 180 when not debugging! 
+        drift_allowed_seconds = 180 
         error_args = {"login_error": "true"}
         task_name = self.get_argument("task", None)
 
