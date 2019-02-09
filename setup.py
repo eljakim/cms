@@ -185,6 +185,7 @@ setup(
             "C++11 / g++=cms.grading.languages.cpp11_gpp:Cpp11Gpp",
             "C11 / gcc=cms.grading.languages.c11_gcc:C11Gcc",
             "C# / Mono=cms.grading.languages.csharp_mono:CSharpMono",
+            "Go=cms.grading.languages.golang:GoLang",
             "Haskell / ghc=cms.grading.languages.haskell_ghc:HaskellGhc",
             "Java 1.4 / gcj=cms.grading.languages.java14_gcj:Java14Gcj",
             "Java / JDK=cms.grading.languages.java_jdk:JavaJDK",
